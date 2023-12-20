@@ -1,0 +1,89 @@
+#version: '3'
+
+#services: 
+#  apache:
+#    build: ./apache
+#    ports: 
+#      - 80:80
+#    volumes:
+#      - ./src:/var/www/html
+#    depends_on:
+#      - mysql
+
+#  mysql:
+#    image: mysql
+#   command: --default-authentication-plugin=mysql_native_password    
+#    ports:
+#      - 3306:3306
+#    environment: 
+#      - MYSQL_ROOT_PASSWORD=root
+#      - MYSQL_DATABASE=lamp_db
+#      - MYSQL_USER=lamp_user
+#      - MYSQL_PASSWORD=lamp_password
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#      - ./sql:/docker-entrypoint-initdb.d 
+
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin
+#    ports:
+#      - 8080:80
+#    environment:
+  #    - PMA_HOST=mysql
+#   depends_on: 
+#      - mysql 
+
+#volumes:
+#  mysql_data:
+
+#Se han añadido dos secciones networks para definir las redes frontend-network y backend-network.
+#Los servicios apache y phpmyadmin están asignados a la red frontend-network usando la clave networks.
+#El servicio mysql está asignado a la red backend-network.
+#Se eliminaron las secciones ports del servicio mysql para que no sea accesible directamente desde el host. Este servicio solo estará disponible internamente en la red backend-network.
+#La sección networks al final del archivo vincula los servicios a sus respectivas redes.
+
+version: '3'
+
+services: 
+  apache:
+    build: ./apache
+    networks:
+      - frontend-network
+    ports: 
+      - 80:80
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password    
+    networks:
+      - backend-network
+    environment: 
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=lamp_db
+      - MYSQL_USER=lamp_user
+      - MYSQL_PASSWORD=lamp_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d 
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    networks:
+      - frontend-network
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+    depends_on: 
+      - mysql 
+
+networks:
+  frontend-network:
+  backend-network:
+
+volumes:
+  mysql_data:
