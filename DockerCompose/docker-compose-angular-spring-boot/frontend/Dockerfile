@@ -1,11 +1,11 @@
-FROM node:12.22-alpine as build
-WORKDIR /usr/angular
-COPY ./package.json .
+FROM node:12.11.1-alpine as angular
+WORKDIR /home/app
+COPY ./package*.json .
 RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine 
-RUN rm -rf /usr/share/nginx/html/e
-COPY --from=angular /home/app/dist/app-name/browser .
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=angular /home/app/dist/frontend .
 EXPOSE 80
